@@ -6,17 +6,17 @@
   <title>Enterprise Lean + AI Learning Game</title>
   <style>
     :root {
-      --bg: #07111f;
-      --panel: rgba(13, 25, 45, 0.92);
-      --panel-2: #12233d;
-      --primary: #42d8ff;
-      --secondary: #9869ff;
-      --success: #43ef9b;
-      --warning: #ffc857;
-      --danger: #ff4f78;
-      --text: #f4f8ff;
-      --muted: #9eb0c9;
-      --border: rgba(122, 160, 210, 0.24);
+      --bg: #f8f7ff;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-2: #f2f5ff;
+      --primary: #70c7e8;
+      --secondary: #b8a8f8;
+      --success: #79d8b5;
+      --warning: #f6cd7d;
+      --danger: #f49aaa;
+      --text: #263458;
+      --muted: #687797;
+      --border: rgba(109, 126, 174, 0.22);
     }
 
     * { box-sizing: border-box; }
@@ -120,7 +120,7 @@
 
     .battle-layout { display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; margin-top: 20px; }
     .battle-card { padding: 24px; }
-    .boss-stage { min-height: 410px; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+    .boss-stage { min-height: 410px; display: flex; flex-direction: column; justify-content: flex-start; text-align: center; }
     .boss-avatar { margin: 20px 0 10px; font-size: 115px; animation: float 2.2s ease-in-out infinite; }
     @keyframes float { 50% { transform: translateY(-10px) rotate(2deg); } }
     .boss-name { margin: 0; font-size: 29px; }
@@ -195,8 +195,190 @@
       background: #071321; color: var(--text); font-weight: 700;
     }
 
+    /* Pastel game theme + side-by-side answer feedback */
+    body {
+      background:
+        radial-gradient(circle at 12% 2%, rgba(190,180,255,.42), transparent 30%),
+        radial-gradient(circle at 88% 8%, rgba(165,232,224,.45), transparent 32%),
+        linear-gradient(145deg, #fff8fc, #f4f7ff 52%, #eefcf9);
+    }
+    .topbar, .battle-card, .map-card, .weapon-card, .result-card {
+      background: rgba(255,255,255,.88); box-shadow: 0 12px 32px rgba(111,120,170,.10);
+    }
+    .topbar { background: linear-gradient(100deg, rgba(218,205,255,.86), rgba(190,229,255,.86), rgba(188,244,224,.86)); }
+    .stat { background:#f8f7ff; }
+    .mission { background:#f7f4ff; }
+    .weapon-btn { background:#fbfcff; color:var(--text); }
+    .weapon-btn:hover { background:#f2f8ff; }
+    .weapon-btn.selected { background:#e5f8f0; }
+    .feedback.good { background:#ebfaf4; border-color:#9ddfc7; }
+    .feedback.bad { background:#fff0f3; border-color:#f4b2bf; }
+    .explanation-box { background:rgba(255,255,255,.72); }
+    .example-flow { background:#f1f3ff; color:var(--text); }
+    .audio-controls { background:rgba(255,255,255,.92); }
+    .audio-btn { background:#f4f3ff; color:var(--text); }
+    .toast { background:#fff; }
+
+    .choice-feedback-grid { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr); gap:14px; align-items:start; }
+    /* Full pastel treatment for HOME circled areas */
+    #homeScreen .boss-preview {
+      background:linear-gradient(145deg,#EEE8FF 0%,#E4F2FF 48%,#E2F7EF 100%) !important;
+      border:2px solid #C8C4EA !important;
+      box-shadow:0 16px 34px rgba(103,112,160,.12) !important;
+    }
+    #homeScreen .boss-preview h2 { color:#263458 !important; }
+    #homeScreen .boss-preview p { color:#53627D !important; }
+    #homeScreen input {
+      background:#F0ECFF !important;
+      color:#24324F !important;
+      border:2px solid #B5AEDF !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.7) !important;
+    }
+    #homeScreen input::placeholder { color:#695F86 !important; opacity:1 !important; }
+    #homeScreen input:focus { background:#F8F6FF !important; border-color:#7EBBD5 !important; box-shadow:0 0 0 4px rgba(126,187,213,.17) !important; }
+    /* Eye-comfort pastel: low-glare surfaces + high-contrast text */
+    body {
+      background:linear-gradient(135deg,#F7F4FB 0%,#F2F7FB 52%,#F1F8F5 100%) !important;
+      color:#263451 !important;
+    }
+    .topbar {
+      background:linear-gradient(100deg,#EAE6F8,#E2F1F7,#E1F4ED) !important;
+      border-color:#C8D3DF !important;
+    }
+    #homeScreen .boss-preview {
+      background:linear-gradient(145deg,#F0EDF8 0%,#EAF4F8 55%,#E8F4EF 100%) !important;
+      border-color:#C4CFDC !important;
+    }
+    #homeScreen input { background:#FAFAFC !important; color:#1E2C48 !important; border-color:#919EB6 !important; }
+    #homeScreen input::placeholder { color:#657086 !important; }
+    #homeScreen .mission { background:#EDF6F3 !important; color:#22334F !important; border-color:#AFCFC3 !important; }
+    .battle-card, .map-card, .weapon-card, .result-card {
+      background:rgba(250,250,252,.96) !important; color:#263451 !important;
+      border-color:#CDD5E1 !important;
+    }
+    #battleScreen .battle-layout > .battle-card:last-child { background:#FAFAFC !important; }
+    #battleScreen .weapon-btn { background:#F5F7FA !important; color:#263451 !important; border-color:#C8D1DF !important; }
+    #battleScreen .weapon-btn small { color:#59677E !important; }
+    #battleScreen .weapon-btn.selected { background:#E4F3EC !important; border-color:#6DB89C !important; color:#193D34 !important; }
+    #battleScreen .mission { background:#F0F3F8 !important; color:#263451 !important; }
+    #resultScreen .result-card { background:#FAFAFC !important; }
+    #resultScreen .badge { background:#EFEDF8 !important; color:#263451 !important; border-color:#CCC7E2 !important; }
+    #resultScreen .submit-card, #resultScreen .rules-card { background:#F0F3F8 !important; color:#263451 !important; }
+    /* Softer pastel backgrounds while preserving strong text contrast */
+    body {
+      background:
+        radial-gradient(circle at 8% 10%, rgba(222,210,255,.72), transparent 34%),
+        radial-gradient(circle at 92% 12%, rgba(191,239,231,.68), transparent 36%),
+        linear-gradient(135deg,#fff8fc 0%,#f6f2ff 38%,#eef8ff 68%,#effcf8 100%) !important;
+    }
+    #homeScreen .boss-preview {
+      background:linear-gradient(145deg,#f3edff 0%,#eaf6ff 52%,#e8faf4 100%) !important;
+      border:2px solid #c9c6ea !important;
+    }
+    #homeScreen input { background:#f8f6ff !important; border-color:#9ea9cb !important; }
+    #homeScreen .mission { background:linear-gradient(90deg,#eef9f7,#f0f5ff) !important; }
+    #resultScreen .submit-card, #resultScreen .rules-card {
+      background:linear-gradient(135deg,#f3efff,#eef8ff) !important;
+    }
+    /* Maximum readability overrides for circled HOME areas */
+    #homeScreen input {
+      background:#FFFFFF !important; color:#14213D !important; border:2px solid #667799 !important;
+      font-weight:700 !important; caret-color:#14213D !important;
+    }
+    #homeScreen input::placeholder { color:#59677F !important; opacity:1 !important; font-weight:600; }
+    #homeScreen .form-field label { color:#182744 !important; font-weight:900 !important; }
+    #homeScreen .form-field small { color:#465570 !important; font-weight:600; }
+    #homeScreen .boss-preview {
+      background:#FFFFFF !important; border:2px solid #B9C7DD !important;
+      box-shadow:0 14px 32px rgba(45,64,100,.10) !important;
+    }
+    #homeScreen .boss-preview::before { background:rgba(205,220,255,.30) !important; }
+    #homeScreen .boss-preview h2 { color:#14213D !important; font-weight:900 !important; }
+    #homeScreen .boss-preview p { color:#40516F !important; font-weight:650 !important; }
+    /* High-contrast readable HOME screen */
+    #homeScreen { color:#1f2d4f; }
+    #homeScreen .lead, #homeScreen p { color:#52617e !important; }
+    #homeScreen .mission { background:#eef9f7 !important; border-color:#8fd7c2 !important; color:#24324f !important; }
+    #homeScreen .mission-label, #homeScreen .mission strong { color:#1f2d4f !important; }
+    #homeScreen label { color:#263458 !important; font-weight:800; }
+    #homeScreen input { background:#ffffff !important; color:#1f2d4f !important; border:2px solid #aeb9d4 !important; }
+    #homeScreen input::placeholder { color:#75829e !important; opacity:1; }
+    #homeScreen input:focus { border-color:#58b9dc !important; box-shadow:0 0 0 4px rgba(88,185,220,.15) !important; }
+    #homeScreen .boss-preview { background:#eef4ff !important; border:1px solid #c9d6ee !important; }
+    #homeScreen .boss-preview h2 { color:#233458 !important; text-shadow:none !important; }
+    #homeScreen .boss-preview p { color:#5a6b88 !important; }
+    #homeScreen .boss-icons { filter:drop-shadow(0 8px 12px rgba(54,68,105,.16)); }
+    /* High-contrast readable result screen */
+    #resultScreen .result-card { background:#fffdfb; color:#24324f; }
+    #resultScreen .result-card > p, #resultScreen .result-card small { color:#56647f !important; }
+    #resultScreen #finalScore { color:#3a9fc8 !important; text-shadow:none !important; }
+    #resultScreen #finalRank { color:#24324f !important; }
+    #resultScreen .badge {
+      background:#f2efff !important;
+      color:#263458 !important;
+      border:1px solid #d6cef8 !important;
+      box-shadow:none !important;
+    }
+    #resultScreen .submit-card, #resultScreen .rules-card {
+      background:#f5f7ff !important;
+      color:#263458 !important;
+      border:1px solid #d9deee !important;
+    }
+    #resultScreen .submit-card h2, #resultScreen .rules-card h2 { color:#24324f !important; }
+    #resultScreen .submit-card p, #resultScreen .submit-card small,
+    #resultScreen .rules-card p, #resultScreen .rules-card li { color:#52617e !important; }
+    #resultScreen .submit-status { color:#263458 !important; background:#ffffff !important; }
+    #resultScreen .submit-status.success { background:#e9f8f1 !important; border-color:#82cfb2 !important; color:#245c49 !important; }
+    #resultScreen .submit-status.error { background:#fff0f3 !important; border-color:#e89aab !important; color:#8a3550 !important; }
+
+    /* Full-width desktop layout */
+    .app, .container, main { width:100%; max-width:none !important; }
+    .app { padding-left:18px !important; padding-right:18px !important; }
+    #battleScreen { width:100%; }
+    #battleScreen .battle-layout { grid-template-columns:minmax(390px,.8fr) minmax(760px,1.7fr); gap:18px; width:100%; }
+    #battleScreen .battle-layout > .battle-card { width:100%; max-width:none; }
+    #battleScreen .choice-feedback-grid { grid-template-columns:minmax(520px,1.05fr) minmax(480px,.95fr); gap:16px; }
+    #battleScreen .weapon-buttons { grid-template-columns:repeat(2,minmax(240px,1fr)); }
+    #battleScreen .weapon-btn { min-height:92px; padding:14px 16px; }
+    #battleScreen .feedback-side { min-width:0; }
+    @media (min-width: 1400px) {
+      #battleScreen .battle-layout { grid-template-columns:minmax(430px,.72fr) minmax(900px,1.85fr); }
+      #battleScreen .choice-feedback-grid { grid-template-columns:minmax(600px,1.12fr) minmax(520px,.88fr); }
+    }
+    /* Readable pastel choice area */
+    #battleScreen .battle-layout > .battle-card:last-child {
+      background:#fffdfb;
+      border-color:#d8dcec;
+      color:#24324f;
+    }
+    #battleScreen .choice-title { color:#24324f; }
+    #battleScreen .weapon-btn {
+      background:#ffffff;
+      color:#24324f;
+      border-color:#d7ddec;
+      box-shadow:0 4px 12px rgba(78,92,135,.06);
+    }
+    #battleScreen .weapon-btn strong { color:#24324f; }
+    #battleScreen .weapon-btn small { color:#53627d; }
+    #battleScreen .weapon-btn:hover { background:#f3f8ff; border-color:#8dcbe4; }
+    #battleScreen .weapon-btn.selected {
+      background:#e9f8f2;
+      border-color:#62c5a1;
+      color:#203d37;
+      box-shadow:0 0 0 2px rgba(98,197,161,.13);
+    }
+    #battleScreen .feedback-placeholder { background:#f8f7ff; color:#66728a; }
+    #battleScreen .feedback.good { color:#203d37; background:#edf9f4; border-color:#9bd8c1; }
+    #battleScreen .feedback.bad { color:#58323c; background:#fff1f4; border-color:#efb7c2; }
+    #battleScreen .explanation-box { background:#ffffff; color:#2a3854; border-color:#d9deea; }
+    #battleScreen .explanation-box h4 { color:#267fa5; }
+    #battleScreen .example-flow { background:#f2f5ff; color:#293754; }
+    .feedback-side .feedback { margin-top:0; min-height:100%; }
+    .feedback-placeholder { padding:18px; border:1px dashed #c7c9e8; border-radius:14px; color:var(--muted); background:#faf9ff; text-align:center; }
+    .feedback-side:has(.feedback.show) .feedback-placeholder { display:none; }
+
     @media (max-width: 850px) {
-      .hero, .battle-layout { grid-template-columns: 1fr; }
+      .hero, .battle-layout, .choice-feedback-grid { grid-template-columns: 1fr; }
       .boss-preview { min-height: 280px; }
       .weapon-grid { grid-template-columns: repeat(2, 1fr); }
       .form-row { grid-template-columns: 1fr; }
@@ -264,23 +446,30 @@
               <h2 class="boss-name" id="bossName">Waiting Monster</h2>
               <div class="hp-label"><span>Boss HP</span><b id="bossHpText">100 / 100</b></div>
               <div class="bar"><div class="bar-fill" id="bossHpBar"></div></div>
-            </div>
-            <div class="mission">
+              <div class="mission" style="margin-top:16px">
               <div class="mission-label">สถานการณ์ / CURRENT SITUATION</div>
-              <p id="scenarioText"></p>
+                <p id="scenarioText"></p>
+              </div>
             </div>
           </article>
 
           <article class="battle-card">
             <h2 class="choice-title">เลือก Weapon ที่เหมาะสม / Choose the Right Weapon</h2>
             <p style="color:var(--muted)">เลือกได้ไม่เกิน 2 รายการ แล้วกดโจมตี / Select up to 2 weapons, then attack.</p>
-            <div class="weapon-buttons" id="weaponButtons"></div>
-            <div class="action-row">
-              <button class="btn secondary" id="clearBtn">ล้างคำเลือก / Clear</button>
-              <button class="btn" id="attackBtn">โจมตี Boss / Attack ⚡</button>
+            <div class="choice-feedback-grid">
+              <div class="choice-side">
+                <div class="weapon-buttons" id="weaponButtons"></div>
+                <div class="action-row">
+                  <button class="btn secondary" id="clearBtn">ล้างคำเลือก / Clear</button>
+                  <button class="btn" id="attackBtn">โจมตี Boss / Attack ⚡</button>
+                </div>
+                <div class="next-wrap" id="nextWrap"><button class="btn" id="nextBtn">ภารกิจถัดไป / Next Mission →</button></div>
+              </div>
+              <div class="feedback-side">
+                <div class="feedback-placeholder">✨ เฉลยและ Key Message จะแสดงตรงนี้หลังโจมตี Boss</div>
+                <div class="feedback" id="feedback"></div>
+              </div>
             </div>
-            <div class="feedback" id="feedback"></div>
-            <div class="next-wrap" id="nextWrap"><button class="btn" id="nextBtn">ภารกิจถัดไป / Next Mission →</button></div>
           </article>
         </div>
       </section>
@@ -295,9 +484,9 @@
             <div id="finalRank" style="font-size:23px;font-weight:900"></div>
             <div class="badge-grid" id="badgeGrid"></div>
             <div class="submit-panel">
-              <h2 style="margin-top:0">ส่งคะแนนเข้าสู่ระบบ / Submit Your Score</h2>
+              <h2 style="margin-top:0">กำลังบันทึกคะแนน... / Saving Your Score...</h2>
               <p style="color:var(--muted)">ระบบจะบันทึกคะแนนตาม Employee ID เพื่อใช้จัดอันดับ Top 3<br><span style="font-size:.84em">Your score will be linked to your Employee ID for the Top 3 leaderboard.</span></p>
-              <button class="btn" id="submitScoreBtn">Submit Score 📤</button>
+              <button class="btn" id="submitScoreBtn" type="button" style="display:none" aria-hidden="true" tabindex="-1">Submit Score 📤</button>
               <div class="submit-status" id="submitStatus"></div>
             </div>
             <div class="rules">
@@ -630,6 +819,8 @@
       ];
       $("badgeGrid").innerHTML = badges.map(x => `<div class="badge">${x}</div>`).join("");
       showScreen("resultScreen");
+      // ส่งคะแนนเข้า Power Automate อัตโนมัติทันทีเมื่อจบเกม
+      submitScore();
     }
 
     function toast(message) {
