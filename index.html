@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Lean + AI Learning Game</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(13, 25, 45, 0.92);
+      --panel-2: #12233d;
+      --primary: #42d8ff;
+      --secondary: #9869ff;
+      --success: #43ef9b;
+      --warning: #ffc857;
+      --danger: #ff4f78;
+      --text: #f4f8ff;
+      --muted: #9eb0c9;
+      --border: rgba(122, 160, 210, 0.24);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(66, 216, 255, .14), transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(152, 105, 255, .17), transparent 30%),
+        linear-gradient(145deg, #050b14, var(--bg) 55%, #09172a);
+      overflow-x: hidden;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { width: min(1180px, calc(100% - 28px)); margin: 0 auto; padding: 22px 0 40px; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      padding: 12px 16px; border: 1px solid var(--border); border-radius: 16px;
+      background: rgba(8, 18, 33, .78); backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.23);
+    }
+    .brand { font-weight: 900; letter-spacing: .6px; }
+    .brand span { color: var(--primary); }
+    .stats { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .stat {
+      min-width: 92px; padding: 8px 11px; border-radius: 12px; background: #0c1b30;
+      border: 1px solid var(--border); color: var(--muted); font-size: 12px;
+    }
+    .stat b { display: block; margin-top: 2px; color: var(--text); font-size: 15px; }
+
+    .screen { display: none; animation: fade .35s ease; }
+    .screen.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .hero {
+      min-height: 76vh; display: grid; grid-template-columns: 1.1fr .9fr; gap: 34px;
+      align-items: center; padding: 58px 20px;
+    }
+    .eyebrow { color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.8px; }
+    h1 { margin: 10px 0 14px; font-size: clamp(42px, 7vw, 82px); line-height: .95; }
+    h1 .glow { color: var(--primary); text-shadow: 0 0 22px rgba(66,216,255,.45); }
+    .lead { max-width: 720px; color: var(--muted); font-size: 19px; line-height: 1.65; }
+    .rule { margin: 18px 0; padding: 14px 16px; border-left: 4px solid var(--success); background: rgba(67,239,155,.07); border-radius: 10px; }
+    .form-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-top: 22px; }
+    .form-field { display:flex; flex-direction:column; gap:6px; }
+    .form-field label { color:var(--muted); font-size:13px; font-weight:700; }
+    .form-row .full { grid-column: 1 / -1; }
+    input, select {
+      width:100%; min-width: 0; padding: 14px 16px; color: var(--text); background: #0c1b30;
+      border: 1px solid var(--border); border-radius: 12px; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(66,216,255,.12); outline:none; }
+    .privacy-note { color:var(--muted); font-size:12px; line-height:1.45; }
+    .submit-panel { margin:22px 0; padding:18px; border-radius:16px; background:#09182a; border:1px solid var(--border); }
+    .submit-status { margin-top:12px; padding:12px; border-radius:10px; display:none; }
+    .submit-status.show { display:block; }
+    .submit-status.ok { background:rgba(67,239,155,.12); border:1px solid rgba(67,239,155,.35); }
+    .submit-status.error { background:rgba(255,79,120,.12); border:1px solid rgba(255,79,120,.35); }
+    .submit-status.sending { background:rgba(66,216,255,.10); border:1px solid rgba(66,216,255,.30); }
+    .btn {
+      border: 0; border-radius: 12px; padding: 13px 19px; font-weight: 800;
+      color: #041018; background: linear-gradient(135deg, var(--primary), var(--success));
+      box-shadow: 0 10px 30px rgba(66,216,255,.18); transition: .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+    .btn.secondary { color: var(--text); background: var(--panel-2); border: 1px solid var(--border); box-shadow: none; }
+    .btn.danger { color: white; background: linear-gradient(135deg, #ff4f78, #ff7b54); }
+
+    .boss-preview {
+      position: relative; min-height: 430px; padding: 30px; border: 1px solid var(--border);
+      border-radius: 28px; background: linear-gradient(160deg, rgba(18,35,61,.94), rgba(7,17,31,.72));
+      display: grid; place-items: center; overflow: hidden;
+    }
+    .boss-preview::before { content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%; background: rgba(152,105,255,.18); filter: blur(20px); }
+    .boss-cluster { z-index: 1; text-align: center; }
+    .boss-icons { font-size: clamp(58px, 9vw, 105px); filter: drop-shadow(0 15px 20px rgba(0,0,0,.4)); }
+    .boss-cluster p { color: var(--muted); }
+
+    .section-title { margin: 34px 0 14px; }
+    .weapon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .weapon-card, .map-card, .battle-card, .result-card {
+      border: 1px solid var(--border); border-radius: 18px; background: var(--panel); box-shadow: 0 18px 48px rgba(0,0,0,.2);
+    }
+    .weapon-card { padding: 18px; }
+    .weapon-card .icon { font-size: 30px; }
+    .weapon-card h3 { margin: 8px 0 5px; }
+    .weapon-card p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .training-actions { display: flex; justify-content: flex-end; margin: 22px 0; }
+
+    .map { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 22px; }
+    .map-card { padding: 16px 10px; text-align: center; opacity: .48; transition: .2s; }
+    .map-card.current { opacity: 1; border-color: var(--primary); box-shadow: 0 0 24px rgba(66,216,255,.12); }
+    .map-card.done { opacity: .84; border-color: var(--success); }
+    .map-card .emoji { font-size: 31px; }
+    .map-card small { display: block; margin-top: 6px; color: var(--muted); }
+
+    .battle-layout { display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; margin-top: 20px; }
+    .battle-card { padding: 24px; }
+    .boss-stage { min-height: 410px; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+    .boss-avatar { margin: 20px 0 10px; font-size: 115px; animation: float 2.2s ease-in-out infinite; }
+    @keyframes float { 50% { transform: translateY(-10px) rotate(2deg); } }
+    .boss-name { margin: 0; font-size: 29px; }
+    .hp-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin: 18px 0 6px; }
+    .bar { height: 16px; padding: 3px; border-radius: 999px; background: #060d17; border: 1px solid var(--border); overflow: hidden; }
+    .bar-fill { height: 100%; width: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--danger), var(--warning)); transition: width .55s ease; }
+    .mission { padding: 18px; border-radius: 14px; background: #09182a; border: 1px solid var(--border); text-align: left; }
+    .mission-label { color: var(--primary); font-size: 12px; font-weight: 900; letter-spacing: 1.4px; }
+    .mission p { font-size: 18px; line-height: 1.55; margin: 8px 0 0; }
+
+    .choice-title { margin-top: 0; }
+    .weapon-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+    .weapon-btn {
+      min-height: 78px; padding: 13px; color: var(--text); background: #0c1b30;
+      border: 1px solid var(--border); border-radius: 14px; text-align: left; transition: .18s ease;
+    }
+    .weapon-btn:hover { transform: translateY(-2px); border-color: var(--primary); }
+    .weapon-btn.selected { border-color: var(--success); background: rgba(67,239,155,.12); box-shadow: 0 0 0 2px rgba(67,239,155,.1); }
+    .weapon-btn strong { display: block; margin-bottom: 3px; }
+    .weapon-btn small { color: var(--muted); }
+    .action-row { display: flex; gap: 10px; margin-top: 16px; }
+    .action-row .btn { flex: 1; }
+
+    .feedback { display: none; margin-top: 16px; padding: 15px; border-radius: 14px; line-height: 1.55; }
+    .feedback.show { display: block; animation: fade .25s ease; }
+    .feedback.good { background: rgba(67,239,155,.11); border: 1px solid rgba(67,239,155,.35); }
+    .feedback.bad { background: rgba(255,79,120,.11); border: 1px solid rgba(255,79,120,.35); }
+    .feedback h3 { margin: 0 0 5px; }
+    .next-wrap { display: none; margin-top: 12px; }
+    .next-wrap.show { display: block; }
+
+    .shake { animation: shake .35s linear; }
+    @keyframes shake { 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }
+    .flash { animation: flash .5s ease; }
+    @keyframes flash { 50% { box-shadow: inset 0 0 100px rgba(67,239,155,.25), 0 0 60px rgba(67,239,155,.22); } }
+
+    .result-wrap { max-width: 860px; margin: 46px auto; }
+    .result-card { padding: 30px; text-align: center; }
+    .result-icon { font-size: 80px; }
+    .final-score { font-size: 60px; font-weight: 900; color: var(--primary); }
+    .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .badge { padding: 16px; border-radius: 14px; background: #0b1a2e; border: 1px solid var(--border); }
+    .rules { text-align: left; padding: 20px; border-radius: 16px; background: #09182a; }
+    .rules li { margin: 10px 0; color: var(--muted); }
+    .rules b { color: var(--text); }
+
+    .toast {
+      position: fixed; right: 18px; bottom: 18px; max-width: 340px; z-index: 99;
+      padding: 15px 17px; border-radius: 14px; background: #11243e; border: 1px solid var(--primary);
+      box-shadow: 0 18px 60px rgba(0,0,0,.35); transform: translateY(130%); transition: .3s ease;
+    }
+    .toast.show { transform: none; }
+
+    .audio-controls {
+      position: fixed; left: 18px; bottom: 18px; z-index: 100;
+      display: flex; gap: 8px; padding: 8px; border-radius: 14px;
+      background: rgba(9,24,42,.92); border: 1px solid var(--border);
+      box-shadow: 0 14px 38px rgba(0,0,0,.35); backdrop-filter: blur(10px);
+    }
+    .audio-btn {
+      width: 44px; height: 40px; border-radius: 10px; color: var(--text);
+      background: #102640; border: 1px solid var(--border); font-size: 18px;
+    }
+    .audio-btn:hover { border-color: var(--primary); transform: translateY(-1px); }
+    .explanation-box {
+      margin-top: 12px; padding: 14px; border-radius: 12px;
+      background: rgba(7,17,31,.56); border: 1px solid var(--border);
+    }
+    .explanation-box h4 { margin: 0 0 8px; color: var(--primary); }
+    .example-flow {
+      margin-top: 10px; padding: 11px 13px; border-radius: 10px;
+      background: #071321; color: var(--text); font-weight: 700;
+    }
+
+    @media (max-width: 850px) {
+      .hero, .battle-layout { grid-template-columns: 1fr; }
+      .boss-preview { min-height: 280px; }
+      .weapon-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+      .form-row .full { grid-column:auto; }
+      .map { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .topbar { align-items: flex-start; }
+      .stats { gap: 6px; }
+      .stat { min-width: 70px; }
+      .weapon-grid, .weapon-buttons, .badge-grid { grid-template-columns: 1fr; }
+      .map { grid-template-columns: repeat(2, 1fr); }
+      .boss-avatar { font-size: 90px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">🎮 PRODUCTIVITY <span>BOSS BATTLE</span></div>
+      <div class="stats">
+        <div class="stat">❤️ Productivity HP<b id="playerHpTop">100</b></div>
+        <div class="stat">🏆 Score<b id="scoreTop">0</b></div>
+        <div class="stat">🔥 Combo<b id="comboTop">x0</b></div>
+      </div>
+    </header>
+
+    <main>
+      <section id="startScreen" class="screen active">
+        <div class="hero">
+          <div>
+            <div class="eyebrow">PRODUCTIVITY BOSS BATTLE</div>
+            <h1 style="text-transform:uppercase;font-size:clamp(40px,6vw,76px)">ENTERPRISE LEAN + AI<br><span class="glow">LEARNING GAME</span></h1>
+            <p class="lead">ต่อสู้กับ 5 Productivity Monsters และเลือกเครื่องมือ Lean, Automation และ AI ให้เหมาะกับปัญหา<br><span style="font-size:.82em">Battle 5 Productivity Monsters and choose the right Lean, Automation and AI tools for each problem.</span></p>
+            <div class="rule"><b>ภารกิจหลัก / Core Mission:</b> อย่า Automate งานที่ไม่ควรมีอยู่ แก้ Process ก่อน แล้วใช้ Technology เฉพาะจุดที่สร้างคุณค่า<br><span style="font-size:.84em">Do not automate work that should not exist. Improve the process first, then apply technology where it creates value.</span></div>
+            <div class="form-row" id="identityForm">
+              <div class="form-field full"><label for="employeeId">รหัสพนักงาน / Employee ID *</label><input id="employeeId" type="text" maxlength="20" autocomplete="off" placeholder="กรอก Employee ID" /></div>
+              <div class="full privacy-note">กรอกเฉพาะรหัสพนักงานเพื่อเริ่มเกม / Enter only your Employee ID to start the game.</div>
+              <button class="btn full" id="startBtn">เริ่มภารกิจ / Start Mission 🚀</button>
+            </div>
+          </div>
+          <div class="boss-preview">
+            <div class="boss-cluster">
+              <div class="boss-icons">🐌📑🔁<br>⌨️🤯👹</div>
+              <h2>6 Battles. One Productivity Mindset.</h2>
+              <p>Lean first. Technology second. Measure the impact.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="trainingScreen" class="screen">
+        <h2 class="section-title">🧰 Training Room: รู้จักอาวุธของคุณ / Know Your Weapons</h2>
+        <p class="lead">แต่ละสถานการณ์อาจมีคำตอบมากกว่าหนึ่งข้อ เลือกอาวุธที่แก้ต้นเหตุ ไม่ใช่เลือก AI เพราะดูทันสมัย<br><span style="font-size:.84em">A situation may have more than one valid response. Solve the root cause instead of choosing AI simply because it is new.</span></p>
+        <div class="weapon-grid" id="trainingWeapons"></div>
+        <div class="training-actions"><button class="btn" id="enterBattleBtn">เข้าสู่สนามรบ / Enter Battle ⚔️</button></div>
+      </section>
+
+      <section id="battleScreen" class="screen">
+        <div class="map" id="battleMap"></div>
+        <div class="battle-layout" id="battleLayout">
+          <article class="battle-card boss-stage" id="bossStage">
+            <div>
+              <div class="boss-avatar" id="bossAvatar">🐌</div>
+              <h2 class="boss-name" id="bossName">Waiting Monster</h2>
+              <div class="hp-label"><span>Boss HP</span><b id="bossHpText">100 / 100</b></div>
+              <div class="bar"><div class="bar-fill" id="bossHpBar"></div></div>
+            </div>
+            <div class="mission">
+              <div class="mission-label">สถานการณ์ / CURRENT SITUATION</div>
+              <p id="scenarioText"></p>
+            </div>
+          </article>
+
+          <article class="battle-card">
+            <h2 class="choice-title">เลือก Weapon ที่เหมาะสม / Choose the Right Weapon</h2>
+            <p style="color:var(--muted)">เลือกได้ไม่เกิน 2 รายการ แล้วกดโจมตี / Select up to 2 weapons, then attack.</p>
+            <div class="weapon-buttons" id="weaponButtons"></div>
+            <div class="action-row">
+              <button class="btn secondary" id="clearBtn">ล้างคำเลือก / Clear</button>
+              <button class="btn" id="attackBtn">โจมตี Boss / Attack ⚡</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+            <div class="next-wrap" id="nextWrap"><button class="btn" id="nextBtn">ภารกิจถัดไป / Next Mission →</button></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="resultScreen" class="screen">
+        <div class="result-wrap">
+          <div class="result-card">
+            <div class="result-icon">🏆</div>
+            <h1 style="font-size:42px">MISSION COMPLETE</h1>
+            <p class="lead" style="margin-inline:auto"><span id="resultName"></span> คุณเอาชนะ Productivity Monsters ได้แล้ว</p>
+            <div class="final-score" id="finalScore">0</div>
+            <div id="finalRank" style="font-size:23px;font-weight:900"></div>
+            <div class="badge-grid" id="badgeGrid"></div>
+            <div class="submit-panel">
+              <h2 style="margin-top:0">ส่งคะแนนเข้าสู่ระบบ / Submit Your Score</h2>
+              <p style="color:var(--muted)">ระบบจะบันทึกคะแนนตาม Employee ID เพื่อใช้จัดอันดับ Top 3<br><span style="font-size:.84em">Your score will be linked to your Employee ID for the Top 3 leaderboard.</span></p>
+              <button class="btn" id="submitScoreBtn">Submit Score 📤</button>
+              <div class="submit-status" id="submitStatus"></div>
+            </div>
+            <div class="rules">
+              <h2>5 Productivity Rules / หลักคิดเพิ่ม Productivity</h2>
+              <ol>
+                <li><b>Don't automate waste.</b> งานที่ไม่จำเป็นควรถูกตัด ไม่ใช่ทำให้เร็วขึ้น</li>
+                <li><b>Simplify before you digitise.</b></li>
+                <li><b>Standardise before you scale.</b></li>
+                <li><b>Use AI where AI adds value.</b></li>
+                <li><b>Keep human judgement where it matters.</b></li>
+              </ol>
+            </div>
+            <p style="font-size:21px;font-weight:800">กลับไปมองงานของคุณ: อะไรควร Eliminate, Simplify, Standardise, Automate หรือใช้ AI?<br><span style="font-size:.8em">Now look at your own work: what should you eliminate, simplify, standardise, automate or improve with AI?</span></p>
+            <button class="btn" id="restartBtn">เล่นอีกครั้ง / Play Again ↻</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="audio-controls" aria-label="Audio controls">
+    <button class="audio-btn" id="musicBtn" title="เปิด/ปิดเพลง">🎵</button>
+    <button class="audio-btn" id="sfxBtn" title="เปิด/ปิดเสียงเอฟเฟกต์">🔊</button>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const weapons = [
+      { id: "eliminate", icon: "🗑️", name: "Eliminate", desc: "ตัดงานหรือขั้นตอนที่ไม่สร้างคุณค่า / Remove non-value-added work" },
+      { id: "simplify", icon: "✂️", name: "Simplify", desc: "ลดขั้นตอนและความซับซ้อน / Reduce steps and complexity" },
+      { id: "standardise", icon: "📐", name: "Standardise", desc: "สร้างแนวทางเดียว ลด Variation / Create one consistent way of working" },
+      { id: "automation", icon: "⚙️", name: "Automation", desc: "ให้ระบบทำงานซ้ำที่มี Rule ชัดเจน / Automate repetitive, rule-based work" },
+      { id: "ai", icon: "🤖", name: "AI", desc: "ช่วยอ่าน สรุป สร้าง จัดประเภท หรือค้นหารูปแบบ / Understand, generate, classify or find patterns" },
+      { id: "human", icon: "👤", name: "Human Judgement", desc: "ให้คนตัดสินใจเรื่องเสี่ยงสูงหรือใช้ดุลยพินิจ / Keep people in high-stakes or judgement-based decisions" }
+    ];
+
+    const battles = [
+      {
+        name: "Waiting Monster", emoji: "🐌",
+        scenario: "ทุก Request ต้องรอ Manager อนุมัติ แม้เป็นรายการ Routine และ Low Risk / Every request waits for manager approval, including routine low-risk cases.",
+        best: ["simplify", "standardise"], acceptable: ["eliminate"],
+        lesson: "ปัญหาหลักไม่ใช่คนอนุมัติทำงานช้า แต่คือทุกงานถูกส่งเข้าคิวเดียวกันโดยไม่แยกความเสี่ยง จึงควรลดขั้นอนุมัติและกำหนดเกณฑ์มาตรฐานให้ชัด",
+        why: "Simplify ช่วยตัด Approval ที่ไม่จำเป็น ส่วน Standardise ช่วยกำหนดว่าเคสใดอนุมัติอัตโนมัติ เคสใดต้องส่งให้ Manager ตรวจ",
+        example: "ตัวอย่าง: คำขอแก้ไขที่อยู่ซึ่งเอกสารครบและข้อมูลตรงระบบ สามารถผ่าน Straight-through Process ได้ ส่วนเคสเอกสารไม่ครบหรือมีความเสี่ยงจึงส่ง Manager",
+        flow: "ก่อน: ทุกเคส → Manager → รอคิว  |  หลัง: Low-risk → ดำเนินการทันที / Exception → Manager",
+        success: "Not every approval adds value."
+      },
+      {
+        name: "Paperwork Monster", emoji: "📑",
+        scenario: "ลูกค้าส่งแบบฟอร์มเข้ามา พนักงานต้องอ่านข้อมูลและกรอกข้อมูลเดิมเข้า System อีกครั้ง / Staff read customer forms and re-key the same data into the system.",
+        best: ["simplify", "ai"], acceptable: ["automation"],
+        lesson: "อย่าเริ่มจากให้ AI อ่านแบบฟอร์มที่ยาวและซับซ้อนทันที ควรลด Field ที่ไม่ใช้จริง ทำรูปแบบเอกสารให้ชัด แล้วจึงใช้ AI ช่วยดึงข้อมูล",
+        why: "Simplify ลดข้อมูลที่ไม่จำเป็น ส่วน AI เหมาะกับการอ่านข้อความหรือเอกสารที่รูปแบบอาจแตกต่างกัน แล้วแปลงเป็นข้อมูลที่ระบบใช้ต่อได้",
+        example: "ตัวอย่าง: ใบคำขอมี 30 ช่อง แต่ระบบใช้จริง 18 ช่อง ให้ตัด 12 ช่องก่อน แล้วใช้ AI Extract ชื่อ เลขที่กรมธรรม์ วันที่ และยอดเงิน พร้อมให้คนตรวจเฉพาะข้อมูลที่ AI ไม่มั่นใจ",
+        flow: "ก่อน: อ่านเอกสาร → Key ทุกช่อง → ตรวจซ้ำ  |  หลัง: ลด Field → AI Extract → Human ตรวจ Exception",
+        success: "Simplify the information before applying technology."
+      },
+      {
+        name: "Rework Monster", emoji: "🔁",
+        scenario: "Customer Information ต้องถูก Key ซ้ำใน 3 Systems ทำให้เกิด Error และ Rework / Customer data is re-keyed into three systems, causing errors and rework.",
+        best: ["eliminate", "automation"], acceptable: ["standardise"],
+        lesson: "ต้นเหตุคือการบันทึกข้อมูลเดิมหลายครั้ง จึงต้องตัดการ Key ซ้ำและเชื่อมข้อมูลจากแหล่งเดียว ไม่ใช่ใช้ AI เลียนแบบการพิมพ์ข้อมูลที่ไม่ควรเกิดขึ้น",
+        why: "Eliminate ตัดกิจกรรมซ้ำ ส่วน Automation ส่งข้อมูลที่ผ่านการตรวจแล้วไปยังระบบอื่นตาม Rule ที่กำหนด",
+        example: "ตัวอย่าง: เจ้าหน้าที่บันทึกเบอร์โทรใน CRM หนึ่งครั้ง จากนั้น Integration หรือ Power Automate ส่งข้อมูลไป Core System และระบบแจ้งเตือน โดยมี Log ตรวจสอบย้อนหลัง",
+        flow: "ก่อน: Key A → Key B → Key C  |  หลัง: Enter Once → Validate → Sync ทุกระบบ",
+        success: "Enter once. Use many times."
+      },
+      {
+        name: "Manual Work Monster", emoji: "⌨️",
+        scenario: "พนักงานได้รับเอกสารจำนวนมากทุกวัน ต้องอ่านและจัดประเภทเพื่อส่งให้ทีมที่รับผิดชอบ / Staff manually read and classify large volumes of documents before routing them.",
+        best: ["ai", "automation"], acceptable: ["standardise"],
+        lesson: "งานนี้มีสองส่วนต่างกัน คือเข้าใจเนื้อหาและส่งงานต่อ AI เหมาะกับส่วนแรก ส่วน Automation เหมาะกับการทำ Action ตามผลลัพธ์",
+        why: "AI อ่านและจัดประเภทเอกสารที่เป็นข้อความ เช่น Claim, Underwriting หรือ Policy Service ส่วน Automation นำผลการจัดประเภทไป Route เข้าคิวงานที่ถูกต้อง",
+        example: "ตัวอย่าง: AI อ่าน Subject และเอกสารแนบ ระบุว่าเป็น Claim Reimbursement ด้วยความมั่นใจสูง แล้ว Workflow ส่งเข้าคิว Claim หากความมั่นใจต่ำให้ส่ง Human Review",
+        flow: "รับเอกสาร → AI Classify → Confident: Route อัตโนมัติ / Uncertain: Human Review",
+        success: "AI understands. Automation executes."
+      },
+      {
+        name: "Complexity Monster", emoji: "🤯",
+        scenario: "Process มี 18 Steps, 4 Approvals, 3 Excel Files และ Manual Checks หลายจุด ควรทำอะไรก่อน? / A process has 18 steps, 4 approvals, 3 Excel files and multiple manual checks. What should come first?",
+        best: ["simplify"], acceptable: ["eliminate", "standardise"],
+        lesson: "Process ที่ซับซ้อนยังไม่พร้อมสำหรับ Automation เพราะ Technology จะทำให้ความซับซ้อนเดิมเกิดเร็วขึ้นและแก้ไขยากขึ้น ควรออกแบบ Flow ใหม่ก่อน",
+        why: "Simplify ทำให้เห็นเส้นทางหลัก ลด Handoffs และรวม Check ที่ซ้ำกัน จากนั้นจึง Standardise และเลือกเฉพาะ Step ที่เหมาะกับ Automation หรือ AI",
+        example: "ตัวอย่าง: รวม Excel 3 ไฟล์เป็นข้อมูลชุดเดียว ลด Approval จาก 4 เหลือ 2 ระดับตามวงเงิน และรวม Manual Check ที่ซ้ำกันเป็น Validation Point เดียว",
+        flow: "18 Steps + 4 Approvals → Simplify → 9 Steps + 2 Risk-based Approvals → Selective Automation",
+        success: "Don't make a bad process faster. Make it better first."
+      },
+      {
+        name: "AUTOMATE EVERYTHING", emoji: "👹",
+        scenario: "มี Report 10 ฉบับ แต่ไม่มีใครใช้ 4 ฉบับ Boss เสนอให้ใช้ AI สร้าง Report ทั้งหมดให้เร็วขึ้น / Ten reports exist, but four are unused. The Boss wants AI to generate all ten faster.",
+        best: ["eliminate"], acceptable: ["human"],
+        lesson: "การสร้าง Report ให้เร็วขึ้นไม่ได้สร้าง Productivity หากไม่มีผู้ใช้หรือไม่มีการตัดสินใจจาก Report นั้น งานที่ไม่มีคุณค่าควรถูกยกเลิกก่อน",
+        why: "Eliminate ป้องกันต้นทุนในการสร้าง ตรวจ และดูแล Report ที่ไม่ใช้ ส่วน Human Judgement ใช้ยืนยันกับเจ้าของข้อมูลว่า Report ใดจำเป็นต่อการควบคุมหรือข้อกำหนด",
+        example: "ตัวอย่าง: ตรวจผู้รับและการใช้งานย้อนหลัง พบว่า 4 Report ไม่มีผู้เปิดและไม่ใช่ Regulatory Report จึงยกเลิก เหลือ 6 Report แล้วค่อยพิจารณา Automation เฉพาะฉบับที่ใช้ตัดสินใจจริง",
+        flow: "10 Reports → Validate Value → Eliminate 4 → Improve/Automate 6 ที่จำเป็น",
+        success: "Don't automate work that should not exist."
+      }
+    ];
+
+    // Web Audio API: เพลงและ SFX ถูกสร้างใน Browser จึงไม่ต้องใช้ไฟล์เสียงภายนอก
+    let audioCtx, musicTimer, musicOn = true, sfxOn = true, musicStep = 0;
+    const melody = [329.63,392.00,493.88,659.25,587.33,493.88,392.00,440.00,523.25,659.25,783.99,659.25,523.25,440.00,392.00,493.88];
+    const bassLine = [82.41,82.41,98.00,110.00,82.41,123.47,110.00,98.00];
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    }
+    function tone(freq, duration=.12, type="square", volume=.035, when=0) {
+      if (!audioCtx || !sfxOn) return;
+      const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+      osc.type=type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime+when);
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime+when);
+      gain.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime+when+duration);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime+when); osc.stop(audioCtx.currentTime+when+duration);
+    }
+    function playSfx(kind) {
+      initAudio();
+      if (!sfxOn) return;
+      if (kind === "click") tone(520,.06,"square",.025);
+      if (kind === "attack") { tone(180,.18,"sawtooth",.055); tone(90,.25,"square",.04,.08); }
+      if (kind === "perfect") [523,659,784,1047].forEach((f,i)=>tone(f,.18,"square",.045,i*.07));
+      if (kind === "good") [392,523,659].forEach((f,i)=>tone(f,.16,"triangle",.04,i*.08));
+      if (kind === "bad") { tone(220,.25,"sawtooth",.045); tone(165,.3,"sawtooth",.04,.12); }
+      if (kind === "victory") [523,659,784,1047,1319].forEach((f,i)=>tone(f,.28,"square",.045,i*.11));
+    }
+    function startMusic() {
+      initAudio(); stopMusic();
+      if (!musicOn) return;
+      musicTimer=setInterval(()=>{
+        if (!musicOn || !audioCtx) return;
+        const step=musicStep++;
+        const f=melody[step % melody.length];
+        const old=sfxOn; sfxOn=true;
+        tone(f,.115, step % 4 === 0 ? "square" : "triangle", .022);
+        if (step % 2 === 0) tone(bassLine[Math.floor(step/2) % bassLine.length], .15, "sawtooth", .012);
+        if (step % 4 === 2) tone(f*2,.055,"square",.009,.045);
+        sfxOn=old;
+      }, 175);
+    }
+    function stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } }
+    function toggleMusic(){ musicOn=!musicOn; $("musicBtn").textContent=musicOn?"🎵":"🔇"; musicOn?startMusic():stopMusic(); }
+    function toggleSfx(){ sfxOn=!sfxOn; $("sfxBtn").textContent=sfxOn?"🔊":"🔈"; if(sfxOn) playSfx("click"); }
+
+
+    // ใส่ URL ของ Power Automate HTTP trigger หรือ API endpoint ที่ IT อนุมัติด้านล่าง
+    // ห้ามใส่ SharePoint credentials, client secret หรือ password ในไฟล์ HTML
+    const BACKEND = {
+      submitUrl: "https://default424992fe6af1421590b3fc5eb9c227.b3.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/13/workflows/67ee5b754457409e894644d8990c02f4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=QcBFhqS2oC5w6btofVTUHWPxrUK-xkN5XWpAG-T61wI",
+      gameVersion: "V3.0",
+      requestTimeoutMs: 15000
+    };
+
+    const state = {
+      identity: { employeeId:"" },
+      player: "Player", hp: 100, score: 0, combo: 0, battle: 0,
+      selected: [], answered: false, results: [], startedAt:null, completedAt:null, submitted:false
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      $(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function updateTopbar() {
+      $("playerHpTop").textContent = state.hp;
+      $("scoreTop").textContent = state.score.toLocaleString();
+      $("comboTop").textContent = `x${state.combo}`;
+    }
+
+    function renderTraining() {
+      $("trainingWeapons").innerHTML = weapons.map(w => `
+        <article class="weapon-card">
+          <div class="icon">${w.icon}</div><h3>${w.name}</h3><p>${w.desc}</p>
+        </article>`).join("");
+    }
+
+    function renderMap() {
+      $("battleMap").innerHTML = battles.map((b, i) => `
+        <div class="map-card ${i < state.battle ? "done" : ""} ${i === state.battle ? "current" : ""}">
+          <div class="emoji">${i < state.battle ? "✅" : b.emoji}</div>
+          <small>${i === battles.length - 1 ? "FINAL BOSS" : `BOSS ${i + 1}`}</small>
+          <b>${b.name}</b>
+        </div>`).join("");
+    }
+
+    function renderBattle() {
+      state.selected = [];
+      state.answered = false;
+      const b = battles[state.battle];
+      renderMap();
+      $("bossAvatar").textContent = b.emoji;
+      $("bossName").textContent = b.name;
+      $("scenarioText").textContent = b.scenario;
+      $("bossHpText").textContent = "100 / 100";
+      $("bossHpBar").style.width = "100%";
+      $("feedback").className = "feedback";
+      $("feedback").innerHTML = "";
+      $("nextWrap").className = "next-wrap";
+      $("attackBtn").disabled = false;
+      $("weaponButtons").innerHTML = weapons.map(w => `
+        <button class="weapon-btn" data-id="${w.id}">
+          <strong>${w.icon} ${w.name}</strong><small>${w.desc}</small>
+        </button>`).join("");
+      document.querySelectorAll(".weapon-btn").forEach(btn => btn.addEventListener("click", () => toggleWeapon(btn)));
+    }
+
+    function toggleWeapon(btn) {
+      if (state.answered) return;
+      const id = btn.dataset.id;
+      if (state.selected.includes(id)) {
+        state.selected = state.selected.filter(x => x !== id);
+        btn.classList.remove("selected");
+      } else {
+        if (state.selected.length >= 2) return toast("เลือกได้สูงสุด 2 Weapons");
+        state.selected.push(id);
+        btn.classList.add("selected");
+      }
+    }
+
+    function clearSelection() {
+      if (state.answered) return;
+      state.selected = [];
+      document.querySelectorAll(".weapon-btn").forEach(b => b.classList.remove("selected"));
+    }
+
+    function sameSet(a, b) {
+      return a.length === b.length && a.every(x => b.includes(x));
+    }
+
+    function attack() {
+      if (state.answered) return;
+      if (!state.selected.length) return toast("กรุณาเลือก Weapon อย่างน้อย 1 รายการ");
+
+      state.answered = true;
+      playSfx("attack");
+      const b = battles[state.battle];
+      const perfect = sameSet(state.selected, b.best);
+      const hasBest = state.selected.some(x => b.best.includes(x));
+      const onlyReasonable = state.selected.every(x => b.best.includes(x) || b.acceptable.includes(x));
+      let points, damage, quality;
+
+      if (perfect) {
+        state.combo += 1;
+        points = 700 + state.combo * 100;
+        damage = 100;
+        quality = "perfect";
+        state.hp = Math.min(100, state.hp + 3);
+      } else if (hasBest && onlyReasonable) {
+        state.combo += 1;
+        points = 400 + state.combo * 50;
+        damage = 75;
+        quality = "good";
+      } else {
+        state.combo = 0;
+        points = 50;
+        damage = 25;
+        quality = "bad";
+        state.hp = Math.max(0, state.hp - 15);
+      }
+
+      state.score += points;
+      state.results.push(quality);
+      updateTopbar();
+      $("bossHpBar").style.width = `${100 - damage}%`;
+      $("bossHpText").textContent = `${100 - damage} / 100`;
+      $("attackBtn").disabled = true;
+
+      const selectedText = state.selected.map(id => weapons.find(w => w.id === id).name).join(" + ");
+      const bestText = b.best.map(id => weapons.find(w => w.id === id).name).join(" + ");
+      const fb = $("feedback");
+
+      if (quality === "perfect") {
+        fb.className = "feedback show good";
+        fb.innerHTML = `<h3>💥 CRITICAL HIT! +${points.toLocaleString()}</h3><b>คำตอบที่เลือก: ${selectedText}</b>
+          <div class="explanation-box"><h4>เฉลยแบบเข้าใจง่าย</h4><p>${b.lesson}</p><p><b>ทำไมต้องเลือกแบบนี้:</b> ${b.why}</p><p><b>ตัวอย่าง:</b> ${b.example}</p><div class="example-flow">${b.flow}</div></div>
+          <p><b>Key message:</b> ${b.success}</p>`;
+        playSfx("perfect");
+        $("bossStage").classList.add("flash");
+      } else if (quality === "good") {
+        fb.className = "feedback show good";
+        fb.innerHTML = `<h3>⚡ GOOD DECISION +${points.toLocaleString()}</h3><p>คำตอบช่วยแก้ปัญหาได้ แต่ Best Combo คือ <b>${bestText}</b></p>
+          <div class="explanation-box"><h4>เฉลยแบบเข้าใจง่าย</h4><p>${b.lesson}</p><p><b>ทำไม Best Combo ดีกว่า:</b> ${b.why}</p><p><b>ตัวอย่าง:</b> ${b.example}</p><div class="example-flow">${b.flow}</div></div>`;
+        playSfx("good");
+        $("bossStage").classList.add("flash");
+      } else {
+        fb.className = "feedback show bad";
+        fb.innerHTML = `<h3>⚠ COMPLEXITY ATTACK! +${points}</h3><p>คำตอบนี้ยังไม่แก้ต้นเหตุ Best approach คือ <b>${bestText}</b></p>
+          <div class="explanation-box"><h4>เฉลยแบบเข้าใจง่าย</h4><p>${b.lesson}</p><p><b>เหตุผล:</b> ${b.why}</p><p><b>ตัวอย่าง:</b> ${b.example}</p><div class="example-flow">${b.flow}</div></div>`;
+        playSfx("bad");
+        $("bossStage").classList.add("shake");
+      }
+      setTimeout(() => $("bossStage").classList.remove("flash", "shake"), 600);
+      $("nextWrap").className = "next-wrap show";
+      $("nextBtn").textContent = state.battle === battles.length - 1 ? "ดูผลภารกิจ / See Results 🏆" : "ภารกิจถัดไป / Next Mission →";
+    }
+
+    function nextBattle() {
+      state.battle += 1;
+      if (state.battle >= battles.length) return showResults();
+      renderBattle();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function getRank(score) {
+      if (score >= 5000) return "👑 Productivity Master";
+      if (score >= 4000) return "🧠 Productivity Expert";
+      if (score >= 3000) return "🤖 Smart Automator";
+      if (score >= 2000) return "⚡ Process Improver";
+      if (score >= 1000) return "🔎 Waste Hunter";
+      return "🌱 Productivity Rookie";
+    }
+
+    function showResults() {
+      state.completedAt = new Date().toISOString();
+      playSfx("victory");
+      const perfects = state.results.filter(x => x === "perfect").length;
+      const goodOrBetter = state.results.filter(x => x !== "bad").length;
+      $("resultName").textContent = `Employee ID: ${state.identity.employeeId}`;
+      $("finalScore").textContent = state.score.toLocaleString();
+      $("finalRank").textContent = getRank(state.score);
+      const badges = [
+        perfects >= 2 ? "💥 Critical Thinker" : "🔎 Waste Hunter",
+        goodOrBetter >= 4 ? "🤖 Smart AI User" : "✂️ Process Simplifier",
+        perfects >= 4 ? "🔥 Lean + AI Master" : "⚡ Productivity Improver"
+      ];
+      $("badgeGrid").innerHTML = badges.map(x => `<div class="badge">${x}</div>`).join("");
+      showScreen("resultScreen");
+    }
+
+    function toast(message) {
+      const el = $("toast");
+      el.textContent = message;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 1900);
+    }
+
+    function readIdentity() {
+      return { employeeId: $("employeeId").value.trim() };
+    }
+
+    function validateIdentity(identity) {
+      if (!identity.employeeId) return "กรุณากรอก Employee ID / Please enter your Employee ID.";
+      if (!/^[A-Za-z0-9._-]{2,20}$/.test(identity.employeeId)) return "Employee ID ใช้ได้เฉพาะตัวอักษร ตัวเลข จุด ขีดกลาง และขีดล่าง / Use letters, numbers, dot, hyphen or underscore only.";
+      return "";
+    }
+
+    function buildSubmissionPayload() {
+      const perfectHits = state.results.filter(x => x === "perfect").length;
+      const goodDecisions = state.results.filter(x => x === "good").length;
+      const incorrectAnswers = state.results.filter(x => x === "bad").length;
+      return {
+        submissionId: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`),
+        employeeId: state.identity.employeeId,
+        score: state.score,
+        rank: getRank(state.score).replace(/^\S+\s/, ""),
+        perfectHits,
+        goodDecisions,
+        incorrectAnswers,
+        remainingHP: state.hp,
+        completedBosses: state.results.length,
+        stageResults: battles.map((b,i) => ({ stage:i+1, boss:b.name, result:state.results[i] || "not_completed" })),
+        startedAt: state.startedAt,
+        completedAt: state.completedAt || new Date().toISOString(),
+        durationSeconds: state.startedAt ? Math.max(0, Math.round((new Date(state.completedAt || Date.now()) - new Date(state.startedAt))/1000)) : null,
+        gameVersion: BACKEND.gameVersion,
+        userAgent: navigator.userAgent
+      };
+    }
+
+    function setSubmitStatus(type, message) {
+      const el=$("submitStatus");
+      el.className=`submit-status show ${type}`;
+      el.textContent=message;
+    }
+
+    async function submitScore() {
+      if (state.submitted) return setSubmitStatus("ok", "ส่งคะแนนเรียบร้อยแล้ว ไม่จําเป็นต้องส่งซ้ำ");
+      if (!BACKEND.submitUrl || BACKEND.submitUrl.includes("PASTE_POWER_AUTOMATE")) {
+        return setSubmitStatus("error", "ยังไม่ได้ตั้งค่า Backend URL กรุณาใส่ Power Automate HTTP Trigger URL ในตัวแปร BACKEND.submitUrl");
+      }
+      const btn=$("submitScoreBtn");
+      btn.disabled=true;
+      setSubmitStatus("sending", "กําลังส่งคะแนนเข้าสู่ระบบ / Submit Your Score...");
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(), BACKEND.requestTimeoutMs);
+      try {
+        const response=await fetch(BACKEND.submitUrl, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(buildSubmissionPayload()),
+          signal:controller.signal
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        let result={};
+        try { result=await response.json(); } catch(e) {}
+        state.submitted=true;
+        localStorage.setItem(`pbb-submitted-${state.identity.employeeId}`, JSON.stringify({score:state.score, submittedAt:new Date().toISOString()}));
+        setSubmitStatus("ok", result.message || "บันทึกคะแนนเรียบร้อยแล้ว คะแนนจะถูกนําไปใช้จัดอันดับ Top 3");
+        btn.textContent="Submitted ✓";
+        playSfx("victory");
+      } catch(error) {
+        btn.disabled=false;
+        setSubmitStatus("error", error.name === "AbortError" ? "การส่งคะแนนใช้เวลานานเกินไป กรุณาตรวจสอบ Network แล้วลองอีกครั้ง" : `ส่งคะแนนไม่สําเร็จ: ${error.message}`);
+      } finally { clearTimeout(timer); }
+    }
+
+    function resetGame() {
+      Object.assign(state, { identity:{employeeId:""}, player:"Player", hp:100, score:0, combo:0, battle:0, selected:[], answered:false, results:[], startedAt:null, completedAt:null, submitted:false });
+      ["employeeId"].forEach(id => $(id).value="");
+      $("submitScoreBtn").disabled=false;
+      $("submitScoreBtn").textContent="Submit Score 📤";
+      $("submitStatus").className="submit-status";
+      updateTopbar();
+      showScreen("startScreen");
+    }
+
+    $("startBtn").addEventListener("click", () => {
+      const identity=readIdentity();
+      const error=validateIdentity(identity);
+      if (error) return toast(error);
+      state.identity=identity;
+      state.player=`Employee ${identity.employeeId}`;
+      state.startedAt=new Date().toISOString();
+      initAudio(); startMusic(); playSfx("click");
+      renderTraining();
+      showScreen("trainingScreen");
+    });
+    ["employeeId"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") $("startBtn").click(); }));
+    $("enterBattleBtn").addEventListener("click", () => { renderBattle(); showScreen("battleScreen"); });
+    $("clearBtn").addEventListener("click", clearSelection);
+    $("attackBtn").addEventListener("click", attack);
+    $("nextBtn").addEventListener("click", nextBattle);
+    $("restartBtn").addEventListener("click", resetGame);
+    $("submitScoreBtn").addEventListener("click", submitScore);
+    $("musicBtn").addEventListener("click", toggleMusic);
+    $("sfxBtn").addEventListener("click", toggleSfx);
+    document.addEventListener("click", e => {
+      if (e.target.closest("button") && !e.target.closest("#attackBtn") && !e.target.closest("#musicBtn") && !e.target.closest("#sfxBtn")) playSfx("click");
+    });
+    updateTopbar();
+  </script>
+</body>
+</html>
